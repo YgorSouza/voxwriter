@@ -2,12 +2,15 @@ import bpy, mathutils.geometry, bmesh, math, time, traceback
 from mathutils.bvhtree import BVHTree
 from mathutils import Vector
 from mathutils.geometry import barycentric_transform
+from functools import lru_cache
 
 import numpy as np
 from .pyvox.models import Vox, Color, get_default_palette
 from .pyvox.writer import VoxWriter
 
-image_tuples = {}
+@lru_cache(maxsize=100)
+def get_pixels(image):
+    return tuple(image.pixels)
 
 def TriangulateMesh( obj ):
 	bm = bmesh.new()
@@ -18,7 +21,6 @@ def TriangulateMesh( obj ):
 	
 # With help from https://blender.stackexchange.com/a/79251
 def get_color_from_geometry(obj, ray_origin, ray_direction, orig_scene=None, location=None, polygon_index=-1):
-	global image_tuples
 	
 	#raycast, or use polygon_index and location if already available
 	if not location or polygon_index == -1:
@@ -63,11 +65,7 @@ def get_color_from_geometry(obj, ray_origin, ray_direction, orig_scene=None, loc
 	)
 	pindex = int(((width * int(coord[1])) + int(coord[0])) * 4)
 	
-	# store images as tuples to avoid recreating the object each loop
-	if image.name not in image_tuples:
-		print('Adding image', image.name)
-		image_tuples[image.name] = tuple(image.pixels)
-	color = image_tuples[image.name][pindex:pindex+4]
+	color = get_pixels(image)[pindex:pindex+4]
 	
 	return color
 
