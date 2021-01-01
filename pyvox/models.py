@@ -10,7 +10,7 @@ Model = namedtuple('Model', 'size voxels')
 Material = namedtuple('Material', 'id type weight props')
 
 def get_default_palette():
-    return [ Color( *tuple(i.to_bytes(4, 'little')) ) for i in default_palette ]
+    return [Color(*tuple(i.to_bytes(4, 'little'))) for i in default_palette]
 
 
 class Vox(object):
@@ -34,7 +34,7 @@ class Vox(object):
 
         import numpy as np
         m = self.models[model_idx]
-        res = np.zeros(( m.size.y, m.size.z, m.size.x, 4 ), dtype='B')
+        res = np.zeros((m.size.y, m.size.z, m.size.x, 4), dtype='B')
 
         for v in m.voxels:
             res[v.y, m.size.z-v.z-1, v.x] = self.palette[v.c]
@@ -45,7 +45,7 @@ class Vox(object):
 
         import numpy as np
         m = self.models[model_idx]
-        res = np.zeros(( m.size.y, m.size.z, m.size.x ), dtype='B')
+        res = np.zeros((m.size.y, m.size.z, m.size.x), dtype='B')
 
         for v in m.voxels:
             res[v.y, m.size.z-v.z-1, v.x] = v.c
@@ -71,7 +71,7 @@ class Vox(object):
             # color index 0 is reserved for empty, so we get 255 colors
             img = Image.fromarray(a.reshape(x, y*z, 3)).quantize(255)
             palette = img.getpalette()
-            palette = [ Color(0, 0, 0, 0) ] + [ Color(*c, 255) for c in chunks(palette, 3) ]
+            palette = [Color(0, 0, 0, 0)] + [Color(*c, 255) for c in chunks(palette, 3)]
             a = np.asarray(img, dtype='B').reshape(x, y, z).copy() + 1
             a[mask] = 0
 
@@ -82,6 +82,6 @@ class Vox(object):
 
         nz = a.nonzero()
 
-        voxels = [ Voxel( nz[2][i], nz[0][i], z-nz[1][i]-1, a[nz[0][i], nz[1][i], nz[2][i]] ) for i in range(nz[0].shape[0]) ]
+        voxels = [Voxel(nz[2][i], nz[0][i], z-nz[1][i]-1, a[nz[0][i], nz[1][i], nz[2][i]]) for i in range(nz[0].shape[0])]
 
-        return Vox([ Model(Size(x, y, z), voxels)], palette)
+        return Vox([Model(Size(x, y, z), voxels)], palette)

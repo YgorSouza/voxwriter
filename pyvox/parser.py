@@ -27,24 +27,24 @@ class Chunk(object):
             n = unpack('i', content)[0]
             log.debug('xyzi block with %d voxels (len %d)', n, len(content))
             self.voxels = []
-            self.voxels = [ Voxel(*unpack('BBBB', content, 4+4*i)) for i in range(n) ]
+            self.voxels = [Voxel(*unpack('BBBB', content, 4+4*i)) for i in range(n)]
         elif id == b'RGBA':
-            self.palette = [ Color(*unpack('BBBB', content, 4*i)) for i in range(255) ]
+            self.palette = [Color(*unpack('BBBB', content, 4*i)) for i in range(255)]
             # Docs say:  color [0-254] are mapped to palette index [1-255]
             # hmm
-            # self.palette = [ Color(0, 0, 0, 0) ] + [ Color(*unpack('BBBB', content, 4*i)) for i in range(255) ]
+            # self.palette = [Color(0, 0, 0, 0)] + [Color(*unpack('BBBB', content, 4*i)) for i in range(255)]
         elif id == b'MATT':
             _id, _type, weight, flags = unpack('iifi', content)
             props = {}
             offset = 16
-            for b, field in [ (0, 'plastic'),
+            for b, field in [(0, 'plastic'),
                              (1, 'roughness'),
                              (2, 'specular'),
                              (3, 'IOR'),
                              (4, 'attenuation'),
                              (5, 'power'),
                              (6, 'glow'),
-                             (7, 'isTotalPower') ]:
+                             (7, 'isTotalPower')]:
                 if bit(flags, b) and b<7: # no value for 7 / isTotalPower
                     props[field] = unpack('f', content, offset)
                     offset += 4
@@ -76,7 +76,7 @@ class VoxParser(object):
         content = self.unpack('%ds'%N)[0]
 
         start = self.offset
-        chunks = [ ]
+        chunks = []
         while self.offset<start+M:
             chunks.append(self._parseChunk())
 
@@ -102,14 +102,14 @@ class VoxParser(object):
 
             log.debug("file has %d models", models)
 
-            models = [ self._parseModel(chunks.pop(), chunks.pop()) for _ in range(models) ]
+            models = [self._parseModel(chunks.pop(), chunks.pop()) for _ in range(models)]
 
             if chunks and chunks[0].id == b'RGBA':
                 palette = chunks.pop().palette
             else:
                 palette = None
 
-            materials = [ c.material for c in chunks ]
+            materials = [c.material for c in chunks]
 
             return Vox(models, palette, materials)
 

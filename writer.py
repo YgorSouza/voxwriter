@@ -9,11 +9,11 @@ from .pyvox.writer import VoxWriter
 
 image_tuples = {}
 
-def TriangulateMesh( obj ):
+def TriangulateMesh(obj):
     bm = bmesh.new()
-    bm.from_mesh( obj.data )
-    bmesh.ops.triangulate( bm, faces=bm.faces[:] )
-    bm.to_mesh( obj.data )
+    bm.from_mesh(obj.data)
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
+    bm.to_mesh(obj.data)
     bm.free()
 
 # With help from https://blender.stackexchange.com/a/79251
@@ -50,7 +50,7 @@ def get_color_from_geometry(obj, ray_origin, ray_direction, orig_scene=None, loc
     uv1 = Vector((uv1[0], uv1[1], 0))
     uv2 = Vector((uv2[0], uv2[1], 0))
     uv3 = Vector((uv3[0], uv3[1], 0))
-    transformed_point = barycentric_transform( location, p1, p2, p3, uv1, uv2, uv3 )
+    transformed_point = barycentric_transform(location, p1, p2, p3, uv1, uv2, uv3)
 
     width = image.size[0]
     height = image.size[1]
@@ -60,7 +60,7 @@ def get_color_from_geometry(obj, ray_origin, ray_direction, orig_scene=None, loc
     coord = (
         round((uv[0] % 1.0) * width-1),
         round((uv[1] % 1.0) * height-1),
-    )
+   )
     pindex = int(((width * int(coord[1])) + int(coord[0])) * 4)
 
     # store images as tuples to avoid recreating the object each loop
@@ -130,21 +130,21 @@ def color_distance(c1, c2):
     return math.sqrt((r1 - r2)**2 + (g1 - g2) ** 2 + (b1 - b2) **2)
 
 def find_center(o):
-    vcos = [ o.matrix_world @ v.co for v in o.data.vertices ]
-    findCenter = lambda l: ( max(l) + min(l) ) / 2
+    vcos = [o.matrix_world @ v.co for v in o.data.vertices]
+    findCenter = lambda l: (max(l) + min(l)) / 2
 
-    x, y, z  = [ [ v[i] for v in vcos ] for i in range(3) ]
-    center = [ findCenter(axis) for axis in [x, y, z] ]
+    x, y, z  = [[v[i] for v in vcos] for i in range(3)]
+    center = [findCenter(axis) for axis in [x, y, z]]
 
     return tuple(center)
 
 def find_bounds(o):
-    vcos = [ o.matrix_world @ v.co for v in o.data.vertices ]
-    findCenter = lambda l: ( max(l) + min(l) ) / 2
+    vcos = [o.matrix_world @ v.co for v in o.data.vertices]
+    findCenter = lambda l: (max(l) + min(l)) / 2
 
-    x, y, z  = [ [ v[i] for v in vcos ] for i in range(3) ]
-    bbox_min = [ min(axis) for axis in [x, y, z] ]
-    bbox_max = [ max(axis) for axis in [x, y, z] ]
+    x, y, z  = [[v[i] for v in vcos] for i in range(3)]
+    bbox_min = [min(axis) for axis in [x, y, z]]
+    bbox_max = [max(axis) for axis in [x, y, z]]
 
     return tuple(bbox_min), tuple(bbox_max)
 

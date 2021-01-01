@@ -18,14 +18,14 @@ class VoxWriter(object):
     def _matflags(self, props):
         flags = 0
         res = b''
-        for b, field in [ (0, 'plastic'),
+        for b, field in [(0, 'plastic'),
                          (1, 'roughness'),
                          (2, 'specular'),
                          (3, 'IOR'),
                          (4, 'attenuation'),
                          (5, 'power'),
                          (6, 'glow'),
-                         (7, 'isTotalPower') ]:
+                         (7, 'isTotalPower')]:
             if field in props:
                 flags |= 1<<b
                 res += pack('f', props[field])
