@@ -15,11 +15,11 @@ def TriangulateMesh( obj ):
     bmesh.ops.triangulate( bm, faces=bm.faces[:] )
     bm.to_mesh( obj.data )
     bm.free()
-    
+
 # With help from https://blender.stackexchange.com/a/79251
 def get_color_from_geometry(obj, ray_origin, ray_direction, orig_scene=None, location=None, polygon_index=-1):
     global image_tuples
-    
+
     #raycast, or use polygon_index and location if already available
     if not location or polygon_index == -1:
         if not orig_scene:
@@ -28,7 +28,7 @@ def get_color_from_geometry(obj, ray_origin, ray_direction, orig_scene=None, loc
         success, location, normal, polygon_index, object, matrix = orig_scene.ray_cast(bpy.context.view_layer, ray_origin, ray_direction, distance=0.002)
         if not success:
             return None
-    
+
     # Find the UV map part corresponding to polygon_index
     slots = obj.material_slots
     material_index = obj.data.polygons[polygon_index].material_index
@@ -41,7 +41,7 @@ def get_color_from_geometry(obj, ray_origin, ray_direction, orig_scene=None, loc
     if not image:
         color = get_material_color(material)
         return [color[0], color[1], color[2]]
-    
+
     # get UV map vertices indices
     verticesIndices = obj.data.polygons[polygon_index].vertices
     p1, p2, p3 = [obj.data.vertices[verticesIndices[i]].co for i in range(3)]
@@ -51,24 +51,24 @@ def get_color_from_geometry(obj, ray_origin, ray_direction, orig_scene=None, loc
     uv2 = Vector((uv2[0], uv2[1], 0))
     uv3 = Vector((uv3[0], uv3[1], 0))
     transformed_point = barycentric_transform( location, p1, p2, p3, uv1, uv2, uv3 )
-    
+
     width = image.size[0]
     height = image.size[1]
-    
+
     uv = Vector((transformed_point.x % 1.0, transformed_point.y % 1.0))
-    
+
     coord = (
         round((uv[0] % 1.0) * width-1),
         round((uv[1] % 1.0) * height-1),
     )
     pindex = int(((width * int(coord[1])) + int(coord[0])) * 4)
-    
+
     # store images as tuples to avoid recreating the object each loop
     if image.name not in image_tuples:
         print('Adding image', image.name)
         image_tuples[image.name] = tuple(image.pixels)
     color = image_tuples[image.name][pindex:pindex+4]
-    
+
     return color
 
 def get_material_image(material):
@@ -154,7 +154,7 @@ def nearest_color(color, palette):
         colors_dict[i] = palette[i]
     closest_colors = sorted(colors_dict, key=lambda point: color_distance(color, colors_dict[point]))
     return colors_dict[closest_colors[0]]
-    
+
 def nearest_color_index(color, palette):
     color = nearest_color(color, palette)
     return palette.index(color)
@@ -167,36 +167,36 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
     print('Converting to vox')
     source = obj
     source_name = obj.name
-    
+
     bpy.ops.object.select_all(action='DESELECT')
     source.select_set(True)
-    
+
     bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":"TRANSLATION"})
     bpy.context.object.name = source_name+'_voxelized'
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     bpy.ops.object.convert(target='MESH')
-    
+
     target_name = bpy.context.object.name
     target = bpy.data.objects[target_name]
     TriangulateMesh(target)
-    
+
     # voxelize
-    
+
     vox_size = max(target.dimensions) / vox_detail
     half_size = vox_size * 0.5
     bbox_min, bbox_max = find_bounds(target)
-    
+
     a = np.zeros((vox_detail, vox_detail, vox_detail), dtype=int)
-    
+
     dg = bpy.context.evaluated_depsgraph_get()
     orig_scene = bpy.context.scene.evaluated_get(dg)
-    
+
     if not use_default_palette:
         palette = []
     else:
         palette = get_default_palette()[1:256]
         print('Default palette length', len(palette))
-    
+
     for x1 in range(0,vox_detail):
         print(str(int(x1 / vox_detail * 100))+'%...')
         x = bbox_min[0] + x1 * vox_size + half_size
@@ -235,7 +235,7 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
     vox.palette = palette
     VoxWriter(file_path, vox).write()
     print('100%... Exported to', file_path)
-    
+
     # delete temporary target
     bpy.ops.object.select_all(action='DESELECT')
     target.select_set(True)
