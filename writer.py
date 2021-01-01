@@ -74,7 +74,7 @@ def get_color_from_geometry(obj, ray_origin, ray_direction, orig_scene=None, loc
 def get_material_image(material):
     try:
         if material:
-            socket = material.node_tree.nodes.get('Principled BSDF',None)
+            socket = material.node_tree.nodes.get('Principled BSDF', None)
             if socket:
                 for link1 in socket.inputs['Base Color'].links:
                     link_node = link1.from_node
@@ -120,21 +120,21 @@ def get_closest_point(p, obj, max_dist=1.84467e+19):
     return result, location, normal, face
 
 def distance(c1, c2):
-    (r1,g1,b1) = c1
-    (r2,g2,b2) = c2
+    (r1, g1, b1) = c1
+    (r2, g2, b2) = c2
     return math.sqrt((r1 - r2)**2 + (g1 - g2) ** 2 + (b1 - b2) **2)
 
 def color_distance(c1, c2):
-    (r1,g1,b1) = c1.r, c1.g, c1.b
-    (r2,g2,b2) = c2.r, c2.g, c2.b
+    (r1, g1, b1) = c1.r, c1.g, c1.b
+    (r2, g2, b2) = c2.r, c2.g, c2.b
     return math.sqrt((r1 - r2)**2 + (g1 - g2) ** 2 + (b1 - b2) **2)
 
 def find_center(o):
     vcos = [ o.matrix_world @ v.co for v in o.data.vertices ]
     findCenter = lambda l: ( max(l) + min(l) ) / 2
 
-    x,y,z  = [ [ v[i] for v in vcos ] for i in range(3) ]
-    center = [ findCenter(axis) for axis in [x,y,z] ]
+    x, y, z  = [ [ v[i] for v in vcos ] for i in range(3) ]
+    center = [ findCenter(axis) for axis in [x, y, z] ]
 
     return tuple(center)
 
@@ -142,9 +142,9 @@ def find_bounds(o):
     vcos = [ o.matrix_world @ v.co for v in o.data.vertices ]
     findCenter = lambda l: ( max(l) + min(l) ) / 2
 
-    x,y,z  = [ [ v[i] for v in vcos ] for i in range(3) ]
-    bbox_min = [ min(axis) for axis in [x,y,z] ]
-    bbox_max = [ max(axis) for axis in [x,y,z] ]
+    x, y, z  = [ [ v[i] for v in vcos ] for i in range(3) ]
+    bbox_min = [ min(axis) for axis in [x, y, z] ]
+    bbox_max = [ max(axis) for axis in [x, y, z] ]
 
     return tuple(bbox_min), tuple(bbox_max)
 
@@ -197,24 +197,24 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
         palette = get_default_palette()[1:256]
         print('Default palette length', len(palette))
 
-    for x1 in range(0,vox_detail):
+    for x1 in range(0, vox_detail):
         print(str(int(x1 / vox_detail * 100))+'%...')
         x = bbox_min[0] + x1 * vox_size + half_size
         if x > bbox_max[0] + vox_size:
             break
-        for y1 in range(0,vox_detail):
+        for y1 in range(0, vox_detail):
             y = bbox_min[1] + y1 * vox_size + half_size
             if y > bbox_max[1] + vox_size:
                 break
-            for z1 in range(0,vox_detail):
+            for z1 in range(0, vox_detail):
                 z = bbox_min[2] + z1 * vox_size + half_size
                 if z > bbox_max[2] + vox_size:
                     break
-                inside, inside_location, inside_normal, inside_face = get_closest_point(Vector((x,y,z)), target, max_dist=half_size*1.5)
+                inside, inside_location, inside_normal, inside_face = get_closest_point(Vector((x, y, z)), target, max_dist=half_size*1.5)
                 if inside:
                     inside = (inside_location[0], inside_location[1], inside_location[2])
-                    vox_min = (x-half_size,y-half_size,z-half_size)
-                    vox_max = (x+half_size,y+half_size,z+half_size)
+                    vox_min = (x-half_size, y-half_size, z-half_size)
+                    vox_max = (x+half_size, y+half_size, z+half_size)
                     if inside > vox_min and inside < vox_max:
                         location = (inside_location[0] + inside_normal[0] * 0.001,
                             inside_location[1] + inside_normal[1] * 0.001,
@@ -228,7 +228,7 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
                             threshold = max(7, min(12, len(palette) * 0.65))
                             palette, color_index = try_add_color_to_palette(color, palette, color_threshold=threshold)
                             #color_index = nearest_color_index(color, palette[1:])
-                            a[y1,(vox_detail-1)-z1,x1] = color_index+1
+                            a[y1, (vox_detail-1)-z1, x1] = color_index+1
 
     vox = Vox.from_dense(a)
     print('Palette length', len(palette))

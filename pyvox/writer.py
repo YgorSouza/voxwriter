@@ -18,7 +18,7 @@ class VoxWriter(object):
     def _matflags(self, props):
         flags = 0
         res = b''
-        for b,field in [ (0, 'plastic'),
+        for b, field in [ (0, 'plastic'),
                          (1, 'roughness'),
                          (2, 'specular'),
                          (3, 'IOR'),

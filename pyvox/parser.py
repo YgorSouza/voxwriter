@@ -32,12 +32,12 @@ class Chunk(object):
             self.palette = [ Color(*unpack('BBBB', content, 4*i)) for i in range(255) ]
             # Docs say:  color [0-254] are mapped to palette index [1-255]
             # hmm
-            # self.palette = [ Color(0,0,0,0) ] + [ Color(*unpack('BBBB', content, 4*i)) for i in range(255) ]
+            # self.palette = [ Color(0, 0, 0, 0) ] + [ Color(*unpack('BBBB', content, 4*i)) for i in range(255) ]
         elif id == b'MATT':
             _id, _type, weight, flags = unpack('iifi', content)
             props = {}
             offset = 16
-            for b,field in [ (0, 'plastic'),
+            for b, field in [ (0, 'plastic'),
                              (1, 'roughness'),
                              (2, 'specular'),
                              (3, 'IOR'),

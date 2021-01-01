@@ -2,8 +2,8 @@
 bl_info = {
     "name": "VoxWriter",
     "author": "Spyduck",
-    "version": (0,2),
-    "blender": (2,80,0),
+    "version": (0, 2),
+    "blender": (2, 80, 0),
     "location": "File > Export > MagicaVoxel (.vox)",
     "description": "Export to MagicaVoxel .vox",
     "category": "Export"}
@@ -42,7 +42,7 @@ class ExportSomeData(Operator, ExportHelper):
     def execute(self, context):
         from .writer import voxelize
         print("running voxelize...")
-        voxelize(context.active_object, self.filepath, vox_detail=max(0,min(126,self.voxel_detail)), use_default_palette=self.use_default_palette)
+        voxelize(context.active_object, self.filepath, vox_detail=max(0, min(126, self.voxel_detail)), use_default_palette=self.use_default_palette)
         return {'FINISHED'}
 
 
