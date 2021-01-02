@@ -6,8 +6,10 @@ from mathutils.geometry import barycentric_transform
 import numpy as np
 from .pyvox.models import Vox, Color, get_default_palette
 from .pyvox.writer import VoxWriter
+from . import baker
 
 image_tuples = {}
+baked_image = None
 
 def TriangulateMesh(obj):
     bm = bmesh.new()
@@ -72,6 +74,8 @@ def get_color_from_geometry(obj, ray_origin, ray_direction, orig_scene=None, loc
     return color
 
 def get_material_image(material):
+    if baked_image is not None:
+        return baked_image
     try:
         if material:
             socket = material.node_tree.nodes.get('Principled BSDF', None)
@@ -179,6 +183,9 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
     target_name = bpy.context.object.name
     target = bpy.data.objects[target_name]
     TriangulateMesh(target)
+    global baked_image
+    with baker.Baker(target, 512, 512) as texture_baker:
+        baked_image = texture_baker.bake()
 
     # voxelize
 
@@ -242,5 +249,8 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
     bpy.ops.object.delete()
     bpy.ops.object.select_all(action='DESELECT')
     source.select_set(True)
+    if baked_image is not None:
+        bpy.data.images.remove(baked_image)
+        baked_image = None
     bpy.context.view_layer.objects.active = source
     print('Took', int(time.time() - last_time), 'seconds')
